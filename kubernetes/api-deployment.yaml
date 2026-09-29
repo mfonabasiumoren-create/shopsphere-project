@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: shopsphere-api
+  labels:
+    app: shopsphere-api
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: shopsphere-api
+
+  template:
+    metadata:
+      labels:
+        app: shopsphere-api
+
+    spec:
+      containers:
+        - name: shopsphere-api
+          image: 181040157383.dkr.ecr.us-east-1.amazonaws.com/shopsphere-api:v1
+
+          ports:
+            - containerPort: 8080
