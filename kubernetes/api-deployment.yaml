@@ -23,5 +23,9 @@ spec:
         - name: shopsphere-api
           image: 181040157383.dkr.ecr.us-east-1.amazonaws.com/shopsphere-api:v1
 
+          envFrom:
+            - configMapRef:
+                name: shopsphere-api-config
+
           ports:
             - containerPort: 8080
