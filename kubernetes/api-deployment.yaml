@@ -1,4 +1,4 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 
 metadata:
@@ -43,3 +43,10 @@ spec:
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
