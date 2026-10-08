@@ -1,4 +1,4 @@
-﻿apiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 
 metadata:
@@ -19,6 +19,10 @@ spec:
         app: shopsphere-api
 
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+            
       containers:
         - name: shopsphere-api
           image: 181040157383.dkr.ecr.us-east-1.amazonaws.com/shopsphere-api:v1
