@@ -25,6 +25,8 @@ spec:
             
       containers:
         - name: shopsphere-api
+          securityContext:
+            readOnlyRootFilesystem: true
           image: 181040157383.dkr.ecr.us-east-1.amazonaws.com/shopsphere-api:v1
 
           envFrom:
