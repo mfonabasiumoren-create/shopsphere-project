@@ -28,7 +28,13 @@ spec:
       containers:
         - name: shopsphere-api
           securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
             readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
           image: 181040157383.dkr.ecr.us-east-1.amazonaws.com/shopsphere-api:v1
 
           envFrom:
