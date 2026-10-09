@@ -318,6 +318,8 @@ http://localhost:8080
 
 ### 6. Run with Docker
 
+The Docker container runs the Flask API using Gunicorn with two worker processes.
+
 Build the container image from the `app` directory:
 
 ```bash
