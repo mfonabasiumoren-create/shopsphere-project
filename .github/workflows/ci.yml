@@ -1,0 +1,55 @@
+name: ShopSphere CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    name: Validate and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install application and validation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r app/requirements.txt PyYAML
+
+      - name: Compile Python application
+        run: python -m py_compile app/app.py
+
+      - name: Validate Kubernetes YAML files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          files = sorted(Path("kubernetes").glob("*.yaml"))
+
+          for path in files:
+              if path.name == "rendered.yaml":
+                  continue
+
+              with path.open(encoding="utf-8") as stream:
+                  list(yaml.safe_load_all(stream))
+
+              print(f"Validated {path}")
+          PY
+
+      - name: Build Docker image
+        run: docker build --tag shopsphere-api:ci ./app
