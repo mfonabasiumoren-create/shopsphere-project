@@ -1,5 +1,7 @@
 import unittest
 
+from unittest.mock import MagicMock, patch
+
 from app.app import app
 
 
@@ -64,5 +66,44 @@ class ShopSphereAPITests(unittest.TestCase):
             {"error": "Quantity must be a positive integer"}
         )
 
-if __name__ == "__main__":
-    unittest.main()
+
+    @patch("app.app.get_db_connection")
+    def test_create_order_success(self, mock_get_db_connection):
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+
+        mock_get_db_connection.return_value = mock_connection
+        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
+
+        mock_cursor.fetchone.return_value = {
+            "id": 1,
+            "name": "Wireless Headphones",
+            "price": 32000,
+            "stock": 10
+        }
+        mock_cursor.lastrowid = 101
+
+        response = self.client.post(
+            "/orders",
+            json={"product_id": 1, "quantity": 2}
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.get_json(),
+            {
+                "message": "Order created successfully",
+                "order": {
+                    "order_id": 101,
+                    "product_id": 1,
+                    "product_name": "Wireless Headphones",
+                    "quantity": 2,
+                    "total": "64000"
+                }
+            }
+        )
+
+        self.assertEqual(mock_cursor.execute.call_count, 3)
+        mock_connection.commit.assert_called_once()
+        mock_connection.rollback.assert_not_called()
+        mock_connection.close.assert_called_once()
