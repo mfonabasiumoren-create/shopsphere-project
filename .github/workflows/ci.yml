@@ -33,6 +33,9 @@ jobs:
       - name: Compile Python application
         run: python -m py_compile app/app.py
 
+      - name: Run automated API tests
+        run: python -m unittest discover -s tests -v
+
       - name: Validate Kubernetes YAML files
         run: |
           python - <<'PY'
