@@ -164,7 +164,7 @@ class ShopSphereAPITests(unittest.TestCase):
             response.get_json(),
             {"error": "Insufficient stock"}
         )
-
+        self.assertEqual(mock_cursor.execute.call_count, 1)
         mock_connection.commit.assert_not_called()
         mock_connection.rollback.assert_not_called()
         mock_connection.close.assert_called_once()
