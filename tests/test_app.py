@@ -107,3 +107,64 @@ class ShopSphereAPITests(unittest.TestCase):
         mock_connection.commit.assert_called_once()
         mock_connection.rollback.assert_not_called()
         mock_connection.close.assert_called_once()
+
+
+
+    @patch("app.app.get_db_connection")
+    def test_create_order_rejects_nonexistent_product(
+        self, mock_get_db_connection
+    ):
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+
+        mock_get_db_connection.return_value = mock_connection
+        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
+
+        mock_cursor.fetchone.return_value = None
+
+        response = self.client.post(
+            "/orders",
+            json={"product_id": 9999, "quantity": 1}
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Product not found"}
+        )
+
+        mock_connection.rollback.assert_not_called()
+        mock_connection.close.assert_called_once()
+
+
+    @patch("app.app.get_db_connection")
+    def test_create_order_rejects_insufficient_stock(
+        self, mock_get_db_connection
+    ):
+        mock_connection = MagicMock()
+        mock_cursor = MagicMock()
+
+        mock_get_db_connection.return_value = mock_connection
+        mock_connection.cursor.return_value.__enter__.return_value = mock_cursor
+
+        mock_cursor.fetchone.return_value = {
+            "id": 1,
+            "name": "Wireless Headphones",
+            "price": 32000,
+            "stock": 10
+        }
+
+        response = self.client.post(
+            "/orders",
+            json={"product_id": 1, "quantity": 11}
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Insufficient stock"}
+        )
+
+        mock_connection.commit.assert_not_called()
+        mock_connection.rollback.assert_not_called()
+        mock_connection.close.assert_called_once()
