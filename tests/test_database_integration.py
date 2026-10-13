@@ -11,11 +11,6 @@ load_dotenv(
 )
 
 
-load_dotenv(
-    Path(__file__).with_name(".env.integration"),
-    override=True,
-)
-
 required_db_settings = (
     "DB_HOST",
     "DB_PORT",
