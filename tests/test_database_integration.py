@@ -148,35 +148,37 @@ class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
         finally:
             self.cleanup_test_product(product_id)
 
-
     def test_cleanup_test_product_removes_product_and_orders(self):
-        connection = get_db_connection()
         product_id = None
 
         try:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO products (name, category, price, stock)
-                    VALUES (%s, %s, %s, %s)
-                    """,
-                    ("Cleanup Test Product", "Testing", 50.00, 3),
-                )
-                product_id = cursor.lastrowid
+            connection = get_db_connection()
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        INSERT INTO products (name, category, price, stock)
+                        VALUES (%s, %s, %s, %s)
+                        """,
+                        ("Cleanup Test Product", "Testing", 50.00, 3),
+                    )
+                    product_id = cursor.lastrowid
 
-                cursor.execute(
-                    """
-                    INSERT INTO orders (product_id, quantity, total)
-                    VALUES (%s, %s, %s)
-                    """,
-                    (product_id, 1, 50.00),
-                )
+                    cursor.execute(
+                        """
+                        INSERT INTO orders (product_id, quantity, total)
+                        VALUES (%s, %s, %s)
+                        """,
+                        (product_id, 1, 50.00),
+                    )
 
-            connection.commit()
-        finally:
-            connection.close()
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+            finally:
+                connection.close()
 
-        try:
             self.cleanup_test_product(product_id)
 
             connection = get_db_connection()
@@ -201,7 +203,6 @@ class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
         finally:
             if product_id is not None:
                 self.cleanup_test_product(product_id)
-
 
 if __name__ == "__main__":
     unittest.main()
