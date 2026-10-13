@@ -1,7 +1,16 @@
+
 import unittest
+from pathlib import Path
+
+
+from dotenv import load_dotenv
+
+load_dotenv(
+    Path(__file__).with_name(".env.integration"),
+    override=True,
+)
 
 from app.app import app, get_db_connection
-
 
 class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
 
