@@ -99,6 +99,9 @@ class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
                 product_id = cursor.lastrowid
 
             connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
         finally:
             connection.close()
 
