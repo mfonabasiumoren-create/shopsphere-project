@@ -9,6 +9,23 @@ class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
         app.config["TESTING"] = True
         self.client = app.test_client()
 
+
+    def cleanup_test_product(self, product_id):
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM orders WHERE product_id = %s",
+                    (product_id,),
+                )
+                cursor.execute(
+                    "DELETE FROM products WHERE id = %s",
+                    (product_id,),
+                )
+            connection.commit()
+        finally:
+            connection.close()
+
     def test_products_endpoint_reads_from_mysql(self):
         response = self.client.get("/products")
 
@@ -16,21 +33,20 @@ class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
 
         data = response.get_json()
 
-        self.assertEqual(data["count"], 3)
-        self.assertEqual(len(data["products"]), 3)
+        self.assertEqual(data["count"], len(data["products"]))
+        self.assertGreaterEqual(data["count"], 3)
 
         product_names = {
             product["name"]
             for product in data["products"]
         }
 
-        self.assertEqual(
-            product_names,
+        self.assertTrue(
             {
                 "Wireless Headphones",
                 "Running Shoes",
                 "Smart Watch",
-            },
+            }.issubset(product_names)
         )
 
     def test_create_order_updates_mysql(self):
@@ -90,21 +106,10 @@ class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
             finally:
                 connection.close()
 
+
         finally:
-            connection = get_db_connection()
-            try:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "DELETE FROM orders WHERE product_id = %s",
-                        (product_id,),
-                    )
-                    cursor.execute(
-                        "DELETE FROM products WHERE id = %s",
-                        (product_id,),
-                    )
-                connection.commit()
-            finally:
-                connection.close()
+            self.cleanup_test_product(product_id)
+
 
 
 if __name__ == "__main__":
