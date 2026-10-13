@@ -1,7 +1,7 @@
 
+import os
 import unittest
 from pathlib import Path
-
 
 from dotenv import load_dotenv
 
@@ -10,7 +10,38 @@ load_dotenv(
     override=True,
 )
 
+
+load_dotenv(
+    Path(__file__).with_name(".env.integration"),
+    override=True,
+)
+
+required_db_settings = (
+    "DB_HOST",
+    "DB_PORT",
+    "DB_NAME",
+    "DB_USER",
+    "DB_PASSWORD",
+)
+
+missing_db_settings = [
+    setting for setting in required_db_settings
+    if not os.getenv(setting)
+]
+
+if missing_db_settings:
+    raise RuntimeError(
+        "Missing integration-test database settings: "
+        + ", ".join(missing_db_settings)
+    )
+
+if os.getenv("DB_NAME") != "shopsphere_test":
+    raise RuntimeError(
+        "Integration tests must use the shopsphere_test database."
+    )
+
 from app.app import app, get_db_connection
+
 
 class ShopSphereDatabaseIntegrationTests(unittest.TestCase):
 
