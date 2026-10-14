@@ -90,6 +90,15 @@ jobs:
           print("Test database initialized successfully.")
           PY
 
+      - name: Validate database schema
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3307"
+          DB_NAME: shopsphere_test
+          DB_USER: shopsphere_test_user
+          DB_PASSWORD: ShopTest_84!
+        run: python tests/validate_database_schema.py
+
       - name: Run automated API tests
         env:
           DB_HOST: 127.0.0.1
